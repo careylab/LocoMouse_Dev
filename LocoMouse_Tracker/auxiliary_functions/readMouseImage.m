@@ -72,6 +72,8 @@ for tSV = 1:size(setVars,2)
                 else
                  warning('readMouseImage: h_flip must be 1 or 0. Set to false.')
                 end
+            else
+                h_flip = false;
             end
             
         case 'split_line'
@@ -119,8 +121,24 @@ for tSV = 1:size(setVars,2)
                 warning('readMouseImage: contrast_template must be a string.')
             end
             
+        case 'SmoothIt'
+            if ischar(SmoothIt)
+                SmoothIt = str2num(SmoothIt);
+            end
+            if ~isempty(SmoothIt)
+
+                if mod(SmoothIt,2)==0
+                    SmoothIt = SmoothIt+1;
+                end
+                if SmoothIt <= 0
+                    SmoothIt = 3;
+                end
+            else
+                warning('Wrong Value for SmoothIt')
+                clear SmoothIt
+            end
+                
         otherwise
-            h_flip = false;
             warning(['readMouseImage: Unknown property "',tVar,'".'])
     end
 end
@@ -153,14 +171,13 @@ if size(Img,3) > 2
     Img = rgb2gray(Img);
 end
 
-% Removing bakground and spreading brightness values:
+% Removing background and spreading brightness values:
 if ~isempty(Bkg)
     Img = Img-Bkg; 
 end
+Img = Img-min(Img(:));
 m = max(Img(:));
-if m < 255
-    Img = uint8((double(Img)/double(m))*255);
-end
+Img = uint8((double(Img)/double(m))*255);
 
 % Apply contrast template.
 if UseTemplate
@@ -172,6 +189,27 @@ if UseTemplate
     end
     Img = uint8((double(n_Img)/double(m))*255);
 end
+
+% Smooth Image
+if exist('SmoothIt','var')
+    
+        for X = 1:SmoothIt
+            for Y = 1:SmoothIt
+                t_Pos(X,Y)=sqrt(sum(abs([X Y]-[ceil(SmoothIt/2)  ceil(SmoothIt/2)]).^2));
+            end
+        end
+        Y = 1-normpdf(1-(t_Pos/max(t_Pos(:))));
+        Img = conv2(double(Img),double(Y));
+        Img = uint8(Img/max(Img(:))*255);
+        
+        margin = (size(Img,1)-size(Bkg,1))/2;
+        Img = Img(margin+1:end-margin,margin+1:end-margin);    
+        Img = Img-min(Img(:));
+        m = max(Img(:));
+        Img = uint8((double(Img)/double(m))*255);
+end
+
+
 
 % If requested, unwarp the image:
 if ~exist('ind_warp_mapping','var')
