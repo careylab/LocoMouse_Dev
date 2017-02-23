@@ -1,4 +1,4 @@
-function [final_tracks,tracks_tail,OcclusionGrid,bounding_box,data,debug] = MTF_rawdata(data, model,bb_choice)
+function [final_tracks,tracks_tail,data,debug] = MTF_rawdata(data, model,bb_choice)
 % MTF   Tracks a set of predefined (mouse) features over a given video.
 %
 % INPUT:
@@ -68,7 +68,7 @@ else
 end
 
 N_frames = floor(vid.Duration * vid.FrameRate);
-% N_frames =10;
+% N_frames = 500;
 % warning('frame number was set to 10 for debugging reasons! - DE')
 
 N_views = 2; % FIXME: Should come from the code...
@@ -159,25 +159,24 @@ load([p_boundingBoxFunctions,filesep,'BoundingBoxOptions.mat'],'ComputeMouseBox_
 disp(['Using bounding box option "',char(ComputeMouseBox_option(bb_choice)),'"']); 
 tcmd_string = strtrim(char(ComputeMouseBox_cmd_string(bb_choice)));
 disp(['(',tcmd_string,')']);
+flip = data.flip;
 parfor i_images = 1:N_frames
-    
     % CODE TESTING [DE]
-%     contrast_template = 'C:\Users\Dennis\Documents\DATA_DarkvsLight_Overground\Contrast_Template.mat';
-%     [I,Iaux] = readMouseImage( ...
-%         vid,...
-%         i_images,...
-%         Bkg,...
-%         data.flip,...
-%         scale,...
-%         ind_warp_mapping,...
-%         expected_im_size,...
-%         'contrast_template',...
-%         contrast_template);
-%     % -----------------------------------------------------------------------------------------------
-%     
+    %contrast_template = 'C:\Users\Dennis\Documents\DATA_DarkvsLight_Overground\Contrast_Template.mat';
+    %[I,Iaux] = readMouseImage( ...
+    %    vid,...
+    %    i_images,...
+    %    Bkg,...
+    %    flip,...
+    %    scale,...
+    %    ind_warp_mapping,...
+    %    expected_im_size,...
+    %    'contrast_template',...
+    %    contrast_template);
+    % -----------------------------------------------------------------------------------------------
+    
     [I,Iaux] = readMouseImage(vid,i_images,Bkg,data.flip,scale,ind_warp_mapping,expected_im_size);
-    
-    
+      
     
     % To change bounding box computation, see READ_BEFORE_CHANGING_ANYTHING.m 
     % in ... \LocoMouse_Dev\LocoMouse_Tracker\boundingBoxFunctions  [DE]
@@ -198,8 +197,8 @@ bounding_box_dim = round(nanmin(nanmean(bounding_box(2,:,:),3) + 3 * nanstd(boun
 Nsamples = 5; 
 coeff = ones(1, Nsamples)/Nsamples;
 bounding_box = round(squeeze(bounding_box(1,:,:)));
-debug.bounding_box = bounding_box;
-debug.bounding_box_dim = bounding_box_dim;
+% debug.bounding_box = bounding_box;
+% debug.bounding_box_dim = bounding_box_dim;
 temp = bounding_box;
 temp = filter(coeff, 1,temp' ,[],1)';
 bounding_box(:,:,Nsamples+1:end-Nsamples) = round(temp(:,:,Nsamples+1:end-Nsamples));clear temp N_samples coeff
@@ -275,8 +274,6 @@ parfor i_images = 1:N_frames
         end
     end
     
-
-
     %% Detecting line features (e.g. tail):
     % Line features are detected independently from the other features
     % (e.g. point features). While not optimal, each feature type follows a
@@ -351,11 +348,11 @@ parfor i_images = 1:N_frames
                 [i{i_views}, j{i_views}] = ind2sub(size(I_cell{i_views}),ind_temp(detections)');
                 if i_views  == 1
                     % Apply non-maxima suppresion to detected areas:
-                    [D2{i_views}, scores{i_views}] = nmsMax_mexed([i{i_views} j{i_views}],box_size_point{i_views}, scores{i_views}','center'); % use pre-compiled version
-                    %[D2{i_views}, scores{i_views}] = nmsMax([i{i_views} j{i_views}],box_size_point{i_views}, scores{i_views}','center');
+%                     [D2{i_views}, scores{i_views}] = nmsMax_mexed([i{i_views} j{i_views}],box_size_point{i_views}, scores{i_views}','center'); % use pre-compiled version
+                    [D2{i_views}, scores{i_views}] = nmsMax([i{i_views} j{i_views}],box_size_point{i_views}, scores{i_views}','center',0.5,true);
                     % Refine locations taking the weighted mean of detections scores arond the maxima found:
-                    D2{i_views} = weightedMean(D2{i_views}, Cmat, box_size_point{i_views});
-                    [D2{i_views}, scores{i_views}] = nmsMax_mexed(D2{i_views},box_size_point{i_views}, scores{i_views},'center'); % use pre-compiled version
+%                     D2{i_views} = weightedMean(D2{i_views}, Cmat, box_size_point{i_views});
+%                     [D2{i_views}, scores{i_views}] = nmsMax_mexed(D2{i_views},box_size_point{i_views}, scores{i_views},'center'); % use pre-compiled version
                     %[D2{i_views}, scores{i_views}] = nmsMax(D2{i_views},box_size_point{i_views}, scores{i_views},'center');
                     D2{1}(:,2) = D2{1}(:,2) + max(OFFSET(1),0);
                     D2{1}(:,1) = D2{1}(:,1) + split_line + max(OFFSET(2),0);
@@ -428,7 +425,7 @@ parfor i_images = 1:N_frames
                 moving = I_vel > 25; %%% FIXME: This clearly depends on image size. Must be normalized in some way.
                 D21_mov = reshape(getWindowFromImage(moving,D2{1}',round(box_size_point{1})/2),[],size(D2{1},1));
                 D22_mov = reshape(getWindowFromImage(moving,D2{2}',round(box_size_point{2})/2),[],size(D2{2},1));
-                
+
                 D21_mov = sum(D21_mov,1) >= 0.02*prod(box_size_point{1}); %%% FIXME: Find robust values for moving/not moving classification.
                 D22_mov = sum(D22_mov,1) >= 0.05*prod(box_size_point{2});
             else
@@ -635,16 +632,19 @@ for i_tracks = 1:N_pointlike_tracks
     M_top(i_tracks,:) = Mpf_top;
 end
 
-
-disp(['flip: ' num2str(data.flip)])
-if data.flip
-    % Vertical flip of tracks: 
-    final_tracks(1,:,:) = size(data.ind_warp_mapping,2) - final_tracks(1,:,:) + 1;
-    tracks_tail(1,:,:) = size(data.ind_warp_mapping,2) - tracks_tail(1,:,:) + 1;
-    final_tracks = final_tracks(:,[3 4 1 2 5],:);
-end
+% The output of this tracker should either be the "internal" tracks of the
+% algorithm i.e. always from left to right, or the fully corrected tracks
+% i.e. that match the input video. Vertically flipped internal tracks are
+% not a meaningful representation. 
+%
+% Code that flipped the tracks moved to the
+% convertTracksToUnconstrainedView function. [joaofayad]
 
 % Debug data:
+debug.bounding_box = bounding_box;
+debug.bounding_box_dim = bounding_box_dim;
+debug.Occlusion_Grid_Bottom = OcclusionGrid;
+debug.Occlusion_Vect_Top = nong_vect;
 debug.tracks_bottom = tracks_bottom;
 debug.M = M;
 debug.tracks_top = tracks_top;

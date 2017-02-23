@@ -52,6 +52,13 @@ if ischar(handles.vid)
     handles.vid = VideoReader(handles.vid);
 end
 
+[handles.root_path,~,~] = fileparts([mfilename('fullpath'),'*.m']);
+
+% Checking the number of frames: Should be the number of frames of the
+% video except when the tracks have less data.
+handles.point_tracks = varargin{1}{2};
+handles.N_frames = min(handles.vid.NumberOfFrames,size(handles.point_tracks,3));
+% handles.N_frames = 
 % Reading the background image:
 if ischar(handles.bkg)
     if strcmpi(handles.bkg,'compute')
@@ -63,20 +70,20 @@ if ischar(handles.bkg)
         else
             convert_rgb2gray = false;
         end
-        
-        if handles.vid.NumberOfFrames < N
-            bkgi = rgb2gray(read(handles.vid,[1 handles.vid.NumberOfFrames]));
+        handles.N_frames = (handles.vid.Duration*handles.vid.FrameRate); 
+        if  handles.N_frames < N
+            bkgi = rgb2gray(read(handles.vid,[1 handles.N_frames]));
             
             if convert_rgb2gray
                 % Stacking the images and converting all as a single image:
-                bkgi = rgb2gray(reshape(permute(bkgi,[1 2 4 3]),[handles.vid.Height handles.vid.Width*handles.vid.NumberOfFrames size(bkg,3)]));
+                bkgi = rgb2gray(reshape(permute(bkgi,[1 2 4 3]),[handles.vid.Height handles.vid.Width*handles.N_frames size(bkg,3)]));
                 % Reshaping into a tensor:
-                handles.bkg = median(reshape(bkgi,[handles.vid.Height handles.vid.Width handles.vid.NumberOfFrames]),3);
+                handles.bkg = median(reshape(bkgi,[handles.vid.Height handles.vid.Width handles.N_frames]),3);
                 clear bkgi;
             end
             
         else
-            frames_to_read = 1:floor(handles.vid.NumberOfFrames/N):N*floor(handles.vid.NumberOfFrames/N);
+            frames_to_read = 1:floor(handles.N_frames/N):N*floor(handles.N_frames/N);
             Bkg = uint8(zeros(handles.vid.Height,handles.vid.Width,N));
             for i_images = 1:N
                 bkgi = read(handles.vid,frames_to_read(i_images));
@@ -92,7 +99,7 @@ if ischar(handles.bkg)
     end
 end
 
-handles.point_tracks = varargin{1}{2};
+
 if ~isempty(handles.point_tracks)
 % For display it is easier to permute these:
 handles.point_tracks = permute(handles.point_tracks,[2 1 3]);
@@ -159,7 +166,8 @@ end
 
 % Initializing the graphic objects:
 handles.plot_handles = zeros(1,handles.N_point_tracks);
-c = [1 0 0;1 0 1;0 0 1;0 1 1;1 0.6941 0.3922]; % Point tracks; % These should be default across the system.
+c = load(fullfile(handles.root_path,'..','LocoMouse_GlobalSettings','colorscheme.mat'),'PointColors');
+c = c.PointColors;% Point tracks; % These should be default across the system.
 if size(c,1) < handles.N_point_tracks+1
     c = [c;lines(handles.N_point_tracks-size(c,1)+1)];
 end
@@ -172,13 +180,13 @@ handles.color_choice = c;clear c;
 % handles.color_choice(:,handles.N_point_tracks+1) = get(handles.plot_handles_tail(1),'Color')';
 
 % Initializing the track list (Default across the system): 
-set(handles.popupmenu_tracks,'String',char({'FR Paw';'HR Paw';'FL Paw';'HL Paw';'Mouth';'Tail'}));
+set(handles.popupmenu_tracks,'String',char({'FR Paw';'HR Paw';'FL Paw';'HL Paw';'Snout';'Tail'}));
 set(handles.popupmenu_tracks,'Value',1);
 
 % Initializing the image slider:
-set(handles.slider_frames,'Max',handles.vid.NumberOfFrames);
+set(handles.slider_frames,'Max',handles.N_frames);
 set(handles.slider_frames,'Min',1);
-set(handles.slider_frames,'SliderStep',[1/handles.vid.NumberOfFrames 0.05]);
+set(handles.slider_frames,'SliderStep',[1/handles.N_frames 0.05]);
 set(handles.slider_frames,'Value',1);
 
 % Initializing the speed slider:
@@ -261,7 +269,7 @@ value = str2double(get(hObject,'String'));
 cf = get(handles.figure1,'UserData');cf = cf{1};
 if ~isnan(value)
     value = round(value);
-    value = min(max(1,value),handles.vid.NumberOfFrames);
+    value = min(max(1,value),handles.N_frames);
     set(handles.edit_frames,'String',num2str(value));
     set(handles.slider_frames,'Value',value);
     set(handles.figure1,'UserData',{value});
@@ -477,7 +485,7 @@ function displayImage(obj,event,handles)
 
 current_frame = get(handles.figure1,'UserData');
 current_frame = current_frame{1};
-if current_frame > handles.vid.NumberOfFrames
+if current_frame > handles.N_frames
     current_frame = 1;
 end
 
@@ -539,7 +547,7 @@ function checkbox_occlusion_Callback(hObject, eventdata, handles)
  
 if get(hObject,'Value')
     current_frame = get(handles.figure1,'UserData');current_frame = current_frame{1};
-    if current_frame > handles.vid.NumberOfFrames
+    if current_frame > handles.N_frames
         current_frame = 1;
     end
     if handles.N_ong_tracks > 0 && get(handles.checkbox_occlusion,'Value')
@@ -615,17 +623,17 @@ if ~isequal(file_name,0) && ~isequal(path_name,0)
     c_pointer = onCleanup(@()(watchoff(fig)));
     
     % Creating the video object:
-    writerObj = VideoWriter(fullfile(path_name,file_name),'MPEG-4');
-    writerObj.FrameRate = 30;
+%     writerObj = VideoWriter(fullfile(path_name,file_name),'MPEG-4');
+%     writerObj.FrameRate = 30;
     % writerObj.ColorChannels = 1;
-    writerObj.Quality = 100;
-    open(writerObj);
-    c_video = onCleanup(@()(close(writerObj)));
+%     writerObj.Quality = 100;
+%     open(writerObj);
+%     c_video = onCleanup(@()(close(writerObj)));
 
     % Play the video to entertain the user while the images are generated and
     % saved into the video object.
 %     c_image = onCleanup(@()(delete('temp_fig.png')));
-    for i_images = 1:handles.vid.NumberOfFrames
+    for i_images = 1:handles.N_frames
         I = read(handles.vid,i_images); 
         if get(handles.checkbox_background,'Value') == 0
             I = I-handles.bkg;
@@ -634,9 +642,9 @@ if ~isequal(file_name,0) && ~isequal(path_name,0)
         I = uint8(I/max(I(:))*255);
         set(handles.image,'CData',I);
         updateMarkers(handles,i_images);
-%         export_fig(handles.axes1,'temp_fig.png','-native')
+        export_fig(handles.axes1,sprintf('ladder_%03d.png',i_images),'-native');
 %         writeVideo(writerObj, imread('temp_fig.png'));
-        writeVideo(writerObj, getframe(handles.axes1));
+%         writeVideo(writerObj, getframe(handles.axes1));
     end
 end
 guidata(hObject,handles);
