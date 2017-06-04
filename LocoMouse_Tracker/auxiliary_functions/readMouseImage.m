@@ -91,11 +91,6 @@ for tSV = 1:size(setVars,2)
             end
             
         case 'contrast_template'
-            % [joaofayad]
-            if isempty(contrast_template)
-                continue;
-            end
-            
             if ischar(contrast_template)
                 if ~isempty(fileparts(contrast_template))
                     [~,~,tcte] = fileparts(contrast_template);
