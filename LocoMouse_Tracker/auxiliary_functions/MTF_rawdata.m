@@ -294,8 +294,13 @@ parfor i_images = 1:N_frames
             x_tail_cut = 1:l_x_cut-round(0.8*tail_x_threshold);
             
             % Croping the mouse:
-            [tracks_tail(:,:,i_images),tm] = tailDetectionFilter3(cellfun(@(x)(x(:,x_tail_cut)),I_cell,'un',0),Tmask, split_line,w_line,rho_line,N_tail_points);
+            if bb_choice == 10
+                 [tracks_tail(:,:,i_images),tm] = tailDetection_BasedOnSide(cellfun(@(x)(x(:,x_tail_cut)),I_cell,'un',0),Tmask, split_line,w_line,rho_line,N_tail_points);
+            else
+                [tracks_tail(:,:,i_images),tm] = tailDetectionFilter3(cellfun(@(x)(x(:,x_tail_cut)),I_cell,'un',0),Tmask, split_line,w_line,rho_line,N_tail_points);
+            end
             mask_i = cellfun(@(x,y)([x true(size(x,1),size(y,2)-size(x,2))]),tm,I_cell,'un',0);
+            
             tracks_tail(:,:,i_images) = bsxfun(@plus,tracks_tail(:,:,i_images),bsxfun(@max,OFFSET,zeros(3,1)));
         else
             mask_i{1} = true(size(I_cell{1}));
