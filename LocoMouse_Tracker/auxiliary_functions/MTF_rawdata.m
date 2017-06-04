@@ -153,7 +153,7 @@ flip = data.flip;
 
 parfor i_images = 1:N_frames
     % CODE TESTING [DE]
-    contrast_template = 'C:\Users\Dennis\Documents\DATA_DarkvsLight_Overground\Contrast_Template.mat';
+    contrast_template = []; % Development code should not be on master [joaofayad]
     [I,Iaux] = readMouseImage( ...
         vid,...
         i_images,...
@@ -232,12 +232,12 @@ tweight =  WS.WeightSettings{bb_choice};
 
 % Looping over all the images
 % warning('for changed to FOR for debugging reasons. [DE]')
-parfor i_images = 1:N_frames
+for i_images = 1:N_frames
 %% Reading images from video and preprocessing data:
     bounding_box_i = bounding_box(:,i_images);
     
     % CODE TESTING [DE]
-    contrast_template = 'C:\Users\Dennis\Documents\DATA_DarkvsLight_Overground\Contrast_Template.mat';
+    contrast_template = []; % Development code should not be on master [joaofayad]
     [~,Iaux] = readMouseImage( ...
         vid,...
         i_images,...
@@ -401,7 +401,7 @@ parfor i_images = 1:N_frames
                 
                 % CODE TESTING [DE]
                 %[~,Iaux2] = readMouseImage(vid,i_images-1,Bkg,data.flip,scale,ind_warp_mapping,expected_im_size);
-                contrast_template = 'C:\Users\Dennis\Documents\DATA_DarkvsLight_Overground\Contrast_Template.mat';
+                contrast_template = []; % No experimental code on master [joaofayad]
                 [~,Iaux2] = readMouseImage( ...
                     vid,...
                     i_images-1,...
