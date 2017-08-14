@@ -251,12 +251,21 @@ parfor i_images = 1:N_frames
             % image.
             x_tail_cut = 1:l_x_cut-round(0.8*tail_x_threshold);
             
-            % Croping the mouse:
-            if bb_choice == 10
-                 [tracks_tail(:,:,i_images),tm] = tailDetection_BasedOnSide(cellfun(@(x)(x(:,x_tail_cut)),I_cell,'un',0),Tmask, split_line,w_line,rho_line,N_tail_points);
-            else
-                [tracks_tail(:,:,i_images),tm] = tailDetectionFilter3(cellfun(@(x)(x(:,x_tail_cut)),I_cell,'un',0),Tmask, split_line,w_line,rho_line,N_tail_points);
-            end
+             % Croping the mouse:
+% [COMMENTED OUT]
+%             % I don't know where this comes from. bb_choice does not exist
+%             % here. It's also not smart to hardcode something using
+%             % bb_choice because the numbers may change.
+%             if bb_choice == 10
+%                  [tracks_tail(:,:,i_images),tm] = tailDetection_BasedOnSide(cellfun(@(x)(x(:,x_tail_cut)),I_cell,'un',0),Tmask, split_line,w_line,rho_line,N_tail_points);
+%             else
+%                 [tracks_tail(:,:,i_images),tm] = tailDetectionFilter3(cellfun(@(x)(x(:,x_tail_cut)),I_cell,'un',0),Tmask, split_line,w_line,rho_line,N_tail_points);
+%             end
+% [------------]
+
+
+            [tracks_tail(:,:,i_images),tm] = tailDetectionFilter3(cellfun(@(x)(x(:,x_tail_cut)),I_cell,'un',0),Tmask, split_line,w_line,rho_line,N_tail_points);
+
             mask_i = cellfun(@(x,y)([x true(size(x,1),size(y,2)-size(x,2))]),tm,I_cell,'un',0);
             
             tracks_tail(:,:,i_images) = bsxfun(@plus,tracks_tail(:,:,i_images),bsxfun(@max,OFFSET,zeros(3,1)));
