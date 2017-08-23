@@ -62,3 +62,11 @@ end
 
 % Checking if the centroid moves mostly right or left:
 flip = sum(diff(C))<0;
+
+if flip == 1
+    flip = true;
+    disp('Auto detection determined mouse to face left.')
+else
+    flip = false;
+    disp('Auto detection determined mouse to face right.')
+end

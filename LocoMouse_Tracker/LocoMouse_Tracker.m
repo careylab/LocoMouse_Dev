@@ -477,10 +477,10 @@ if is_cpp
       
     parfor i_files = 1:N_files
         file_name = char(strtrim(gui_status.file_list{i_files}));
-        
-        [~, bkg_file] = check_the_background(gui_status.bkg_fun,file_name);
-        flip = check_the_flip(gui_status.flip,file_name,bkg_file);
-        
+
+        [~, bkg_file] = check_the_background(gui_status.bkg_fun,file_name,handles.CreateBackgroundImage.Value);
+        flip = check_the_flip(handles.MouseOrientation.Value,file_name,bkg_file);
+
         successful_tracking(i_files) = track_MATLAB_CPP(...
             handles.data,...
             model_file_yml,...
@@ -503,6 +503,9 @@ else
     % MATLAB code:
     for i_files = 1:N_files
         file_name = char(strtrim(gui_status.file_list{i_files}));
+        
+        [~, bkg_file] = check_the_background(gui_status.bkg_fun,file_name,handles.CreateBackgroundImage.Value);
+        flip = check_the_flip(handles.MouseOrientation.Value,file_name,bkg_file);
         
         successful_tracking(i_files) = track_MATLAB_CPP(...
             handles.data,...
@@ -531,7 +534,8 @@ set(handles.enable_with_start,'Enable','off');
 %         Checks if indicated file exists, then checks if sameName file
 %         exists. If both are negative, it creates a background image with
 %         the sameName convention.
-function [bkg_fun, bkg_file] = check_the_background(bkg_fun,file_name)
+function [bkg_fun, bkg_file] = check_the_background(bkg_fun,file_name,make_bkg)
+
         bkg_file = feval(bkg_fun,file_name);
         sameName_file = feval('sameName',file_name);
         
@@ -573,16 +577,32 @@ function [bkg_fun, bkg_file] = check_the_background(bkg_fun,file_name)
             end
         end
         
-% CHECK FLIP STATUS
+% CHECK Mouse Orientation
 function [flip] = check_the_flip(gui_flip,file_name,Bkg)
-    switch gui_flip           
-        case 'compute'
-            flip = checkMouseSide(vid,Bkg); % Check if video is reversed.               
-        case 'LR'
-            flip = strcmp(file_name(end-4),'L');         
-        case false || true
-            flip = gui_flip;
+    [~,fname,~] = fileparts(file_name);
+    checkside = false;
+    switch gui_flip
+        case 1
+            checkside = true;
+        case 2
+            if strcmp(fname(end),'L') || strcmp(fname(end),'R')
+                flip = strcmp(fname(end),'L');
+            else
+                disp(['WARNING: Failed to resolve mouse orientation.'])
+                disp([fname, ' does not end in L or R. Attempting automatic detection.'])
+               checkside = true;
+            end
+        case 3
+            flip = false;
+        case 4
+            flip = true;
     end
+    if checkside
+        vid = VideoReader(file_name);
+        flip = checkMouseSide(vid,Bkg); % Check if video is reversed.
+    end
+
+   
     
 
 
@@ -691,7 +711,9 @@ try
         
         % ATTEMPTING TO TRACK:
         current_file_time = tic;
-        fprintf('Tracking %s ...\n',file_name)
+        fsi = strfind(file_name,filesep);
+        
+        fprintf('Tracking %s ...\n',file_name(fsi(end)+1:end))
         data.flip = flip;
         data.bkg = bkg_file;
         data.vid = file_name;
@@ -1378,7 +1400,9 @@ model_file = get(handles.popupmenu_model,'String');
 gui_status.model_file = model_file{model_file_pos};
 
 % Configure Mouse orientation:
-% Checking which side the mouse faces:
+% This is now done for each file individually using check_the_flip() [DE].
+% Leaving the following code here because I don't know if removing it
+% breaks the 'send to cluster' functionality.
 gui_status.flip_function = [];
 gui_status.flip_char = '';
 switch handles.MouseOrientation.Value
@@ -1394,6 +1418,7 @@ switch handles.MouseOrientation.Value
         gui_status.flip = true;
         gui_status.flip_char = 'L';
 end
+
 
 % Configure Output function:
 output_mode = get(handles.popupmenu_output_mode,'Value');
