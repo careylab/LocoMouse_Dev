@@ -66,21 +66,6 @@ N_frames = floor(vid.Duration * vid.FrameRate);
 
 N_views = 2; % FIXME: Should come from the code...
 
-if ~isfield(data,'flip')
-    data.flip = checkMouseSide(vid,Bkg); % Check if video is reversed.
-elseif ischar(data.flip)
-    switch data.flip
-        case 'LR' % check if mouse comes from L or R based file name [GF]
-            if strcmp(data.bkg(end-4),'L')
-                data.flip = true;
-            else
-                data.flip = false;
-            end           
-    end
-elseif ~any(ismember([0 1],data.flip))
-    data.flip = checkMouseSide(vid,Bkg); % Check if video is reversed.
-end
-
 if ~isfield(data,'scale')
     scale = 1;
 else

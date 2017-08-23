@@ -46,7 +46,7 @@
     ComputeMouseBox_cmd_string(tON) = {'[bounding_box(:,:,1), cc, I_crop] =  computeMouseBox(Iaux,split_line);'};  
     WeightSettings{tON} = weight_defaults;
     
-%% [1a] Ladder setup (original)
+%% [2] Ladder setup (original)
     tON = tON+1; % don't edit
     ComputeMouseBox_option(tON) = {'Ladder [Goncalo]'};
     ComputeMouseBox_cmd_string(tON) = {'[bounding_box(:,:,1), cc, I_crop] =  computeMouseBox(Iaux,split_line);'};  
@@ -57,13 +57,13 @@
                              0.45,  0,      0.3;... % Hind Left
                              1,     0.5,    0.20];  % snout
                          
-%% [2] Treadmill setup (Dana) [rewritten by DE]
+%% [3] Treadmill setup (Dana) [rewritten by DE]
     tON = tON+1; % don't edit
     ComputeMouseBox_option(tON) = {'Treadmill [Dana] (DE)'};
     ComputeMouseBox_cmd_string(tON) = {'[bounding_box(:,:,1), cc, I_crop] =  computeMouseBox_TM_JF(Iaux,split_line);'};    
     WeightSettings{tON} = weight_defaults;
 
-%% [3] Headfixed (hard coded) (Hugo)
+%% [4] Headfixed (hard coded) (Hugo)
     tON = tON+1; % don't edit
     ParameterSet ='3'; % 
     ComputeMouseBox_option(tON) = {'Headfixed (set 3) [Hugo]'};
@@ -74,14 +74,20 @@
                             0.5,	0.25,   0.3,	0.2,	0.85,	0.0,	0.7   ; ...     % HL paw
                             1,      0.5,    0.20,	NaN,	NaN,	NaN,	NaN];           % snout
 
-%% [4] MATLAB Reeler: Variation on the standard method for the reeler mice.
+%% [5] MATLAB Reeler: Variation on the standard method for the reeler mice.
 % The tail algorithm for this method gives preference to the side view
 % instead of the bottom view.
-tON = tON + 1;
-ComputeMouseBox_option(tON) = {'MATLAB Reeler'};
-ComputeMouseBox_cmd_string(tON) = {'[bounding_box(:,:,1), cc, I_crop] =  computeMouseBox(Iaux,split_line);'};
-WeightSettings{tON} = weight_defaults;
-                        
+    tON = tON + 1;
+    ComputeMouseBox_option(tON) = {'MATLAB Reeler'};
+    ComputeMouseBox_cmd_string(tON) = {'[bounding_box(:,:,1), cc, I_crop] =  computeMouseBox(Iaux,split_line);'};
+    WeightSettings{tON} = weight_defaults;
+
+%% [5] Matlab DarkOne IR tracking.
+
+    tON = tON+1; % don't edit
+    ComputeMouseBox_option(tON) = {'Treadmill DarkOne IR [DE]'};
+    ComputeMouseBox_cmd_string(tON) = {'[bounding_box(:,:,1), cc, I_crop] =  computeMouseBox_DarkOne(Iaux,split_line);'};    
+    WeightSettings{tON} = weight_defaults; 
                         
 %% C++ Code:
 % C++ code is run by passing it a 'c++' string instead of a bounding box
@@ -98,32 +104,32 @@ WeightSettings{tON} = weight_defaults;
 % cpp_config_file: Name of the yml config file for the cpp algorithm. These
 % files must lie inside "LocoMouse_Tracker/auxiliary_functions/cpp/".
 
-%% C++ Overground
+%% [6] C++ Overground
 tON = tON+1; % don't edit
 ComputeMouseBox_option(tON) = {'C++ Overground'}; 
 ComputeMouseBox_cmd_string(tON) = {{'c++','0','config.yml'}};  
 
-%% C++ Treadmill
+%% [7] C++ Treadmill
 tON = tON+1; % don't edit
 ComputeMouseBox_option(tON) = {'C++ Treadmill'}; 
 ComputeMouseBox_cmd_string(tON) = {{'c++','1','config_tm.yml'}};
 
-%% C++ Head Fixed
+%% [8] C++ Head Fixed
 tON = tON+1; % don't edit
 ComputeMouseBox_option(tON) = {'C++ Head Fixed'}; 
 ComputeMouseBox_cmd_string(tON) = {{'c++','1','config_hf.yml'}};
 
-%% C++ Ladder
+%% [9] C++ Ladder
 tON = tON+1; % don't edit
 ComputeMouseBox_option(tON) = {'C++ Ladder'}; 
 ComputeMouseBox_cmd_string(tON) = {{'c++','0','config.yml'}};
            
-%% C++ Rotary Treadmill
+%% [10] C++ Rotary Treadmill
 tON = tON+1; % don't edit
 ComputeMouseBox_option(tON) = {'C++ Rotary Treadmill'}; 
 ComputeMouseBox_cmd_string(tON) = {{'c++','1','config_rtm.yml'}};
 
-%% C++ IR Treadmill
+%% [11] C++ IR Treadmill
 tON = tON+1; % don't edit
 ComputeMouseBox_option(tON) = {'C++ IR Treadmill'}; 
 ComputeMouseBox_cmd_string(tON) = {{'c++','2','config_tm.yml'}};
