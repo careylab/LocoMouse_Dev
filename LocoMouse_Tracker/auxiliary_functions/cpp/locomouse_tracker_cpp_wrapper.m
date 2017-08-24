@@ -1,4 +1,4 @@
-function [final_tracks_c, tracks_tail_c,data,debug] = ...
+function [final_tracks_c, tracks_tail_c,data,debug_info] = ...
     locomouse_tracker_cpp_wrapper(...
     data,...
     model_file_yml,...
@@ -60,12 +60,12 @@ delete(output_file);
 if exist(debug_file,'file')
 
     %
-    %     debug = importLocoMouseYAML(debug_file);
+    %     debug_info = importLocoMouseYAML(debug_file);
     delete(debug_file);
 end
 %
 % else
-debug = [];
+debug_info = [];
 % end
 
 

@@ -29,7 +29,7 @@ try
                 if i_v == 1
                     split = 'bottom';
                 else
-                    split = 'top';
+                    split = 'side';
                 end
                 
                 fprintf(fid,'model%s_%s: !!opencv-matrix\n',fname,split);
