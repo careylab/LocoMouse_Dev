@@ -60,7 +60,7 @@
 %% [3] Treadmill setup (Dana) [rewritten by DE]
     tON = tON+1; % don't edit
     ComputeMouseBox_option(tON) = {'Treadmill [Dana] (DE)'};
-    ComputeMouseBox_cmd_string(tON) = {'[bounding_box(:,:,1), cc, I_crop] =  computeMouseBox_TM_JF(Iaux,split_line);'};    
+    ComputeMouseBox_cmd_string(tON) = {'[bounding_box(:,:,1), cc, I_crop] =  computeMouseBox_TM_DE_V1(Iaux,split_line);'};    
     WeightSettings{tON} = weight_defaults;
 
 %% [4] Headfixed (hard coded) (Hugo)
@@ -88,7 +88,19 @@
     ComputeMouseBox_option(tON) = {'Treadmill DarkOne IR [DE]'};
     ComputeMouseBox_cmd_string(tON) = {'[bounding_box(:,:,1), cc, I_crop] =  computeMouseBox_DarkOne(Iaux,split_line);'};    
     WeightSettings{tON} = weight_defaults; 
-                        
+    
+%% [] MATLAB Alternative TM BB V1[JF]
+    tON = tON+1; % don't edit
+    ComputeMouseBox_option(tON) = {'Treadmill Alternative BB V1 [JF]'};
+    ComputeMouseBox_cmd_string(tON) = {'[bounding_box(:,:,1), cc, I_crop] =  computeMouseBox_TM_JF(Iaux,split_line);'};    
+    WeightSettings{tON} = weight_defaults;
+
+    %% [] MATLAB Alternative TM BB V2[JF]
+    tON = tON+1; % don't edit
+    ComputeMouseBox_option(tON) = {'Treadmill Alternative BB V2[JF]'};
+    ComputeMouseBox_cmd_string(tON) = {'[bounding_box(:,:,1), cc, I_crop] =  computeMouseBox_TM_JF_V2(Iaux,split_line);'};    
+    WeightSettings{tON} = weight_defaults;
+    
 %% C++ Code:
 % C++ code is run by passing it a 'c++' string instead of a bounding box
 % command. This is checked by the tracking code and the c++ executable is
@@ -111,7 +123,7 @@ ComputeMouseBox_cmd_string(tON) = {{'c++','0','config.yml'}};
 
 %% [7] C++ Treadmill
 tON = tON+1; % don't edit
-ComputeMouseBox_option(tON) = {'C++ Treadmill'}; 
+ComputeMouseBox_option(tON) = {'C++ Treadmill [Dana]'}; 
 ComputeMouseBox_cmd_string(tON) = {{'c++','1','config_tm.yml'}};
 
 %% [8] C++ Head Fixed
@@ -131,7 +143,7 @@ ComputeMouseBox_cmd_string(tON) = {{'c++','1','config_rtm.yml'}};
 
 %% [11] C++ IR Treadmill
 tON = tON+1; % don't edit
-ComputeMouseBox_option(tON) = {'C++ IR Treadmill'}; 
+ComputeMouseBox_option(tON) = {'C++ TM Alternative BB V1 [JF]'}; 
 ComputeMouseBox_cmd_string(tON) = {{'c++','2','config_tm.yml'}};
 
 

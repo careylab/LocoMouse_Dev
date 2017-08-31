@@ -60,9 +60,17 @@ elseif length(threshold) == 1 % if only one threshold is set,
 end
 
 % Fixed parameters:
-width = 400;
-width_margin = 0.10;
+BB_WIDTH = 400;
+WIDTH_MARGIN = 0.10;
 CC = [];
+MIN_VIS_PIXEL = 10;
+
+% Setup dependent parameters: These are hardcoded by setup creators:
+BB_LEFT_MARGIN = 100;
+BB_RIGHT_MARGIN = 150;
+BB_TOP_MARGIN = 46;
+BB_BOTTOM_MARGIN = 761;
+
 [I_crop{[1 2]}] = splitImage(I,split_line);
     ti = 1;
 % [1] for ti = [1 2] this script only uses the side view to determine the box
@@ -70,21 +78,21 @@ CC = [];
 % [2] [Start] Dana special: padding with a black frame
     
     Ibw = im2bw(I_crop_bw{ti},threshold(ti));
-    Ibw(1:100,:) = 0;
-    Ibw(150:end,:) = 0;
-    Ibw(:,1:46,:) = 0;
-    Ibw(:,761:end) = 0;
+    Ibw(1:BB_LEFT_MARGIN,:) = 0;
+    Ibw(BB_RIGHT_MARGIN:end,:) = 0;
+    Ibw(:,1:BB_TOP_MARGIN,:) = 0;
+    Ibw(:,BB_BOTTOM_MARGIN:end) = 0;
 
 if ~isempty(any(Ibw(:)))
     
     % Sum white pixels along row and column to get a "projection" of the
     % mouse
     reduce_row = sum(Ibw,1);
-    reduce_col = sum(Ibw,2);
+%     reduce_col = sum(Ibw,2);
     
     % Find rightmost column that sums to more than 10 pixels and add a 5%
     % margin so long as we are within image bounds:
-    tX = min(find(reduce_row > 10,1,'last') + width_margin*width,size(I,2));
+    tX = min(find(reduce_row >= MIN_VIS_PIXEL,1,'last') + WIDTH_MARGIN*BB_WIDTH,size(I,2));
     
     % Find the first and last rows to sum to more than 20 pixels and add a
     % 10% margin 
@@ -96,11 +104,11 @@ if ~isempty(any(Ibw(:)))
 
     height_side = size(I_crop{2},1);
     
-    if width >= tX
-        width=tX-1;
+    if BB_WIDTH >= tX
+        BB_WIDTH=tX-1;
     end
     box=[   tX,     size(I_crop{2},1)-1,    size(I_crop{1},1)-1;...
-            width,	size(I_crop{2},1)-1,      height_side];
+            BB_WIDTH,	size(I_crop{2},1)-1,      height_side];
 else
     box=   NaN(2,3);
 end

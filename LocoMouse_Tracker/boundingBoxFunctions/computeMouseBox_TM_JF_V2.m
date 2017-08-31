@@ -1,4 +1,4 @@
-function [box, CC, I_crop, I_crop_bw] = computeMouseBox_TM_DE_V1(I,split_line,threshold)
+function [box, CC, I_crop,Ibw] = computeMouseBox_TM_JF(I,split_line,threshold)
 
 % COMPUTEMOUSEBOX in its different version computes the bounding box around 
 % the mouse on a background subtracted image.
@@ -17,15 +17,15 @@ function [box, CC, I_crop, I_crop_bw] = computeMouseBox_TM_DE_V1(I,split_line,th
 % - bounding box: a 2x3 matrix for 
 %              [br_x    br_yb      br_yt; ...
 %               width   height_b   height_t];
-                %   with
-                %   br_x    = x of bottom right corner
-                %   br_yb   = y of bottom half of the image (bottom view)
-                %   br_yt   = y of top half of the image (lateral view)
-                %   width   = width
-                %   height_b= height in bottom half of the image
-                %   height_t= height in top half of the image
-%               Cordinates refer to the image halves *after cutting*. 
-%               In whole image br_yt needs to be added to the split line.
+%                   with
+%                   br_x    = x of bottom right corner
+%                   br_yb   = y of bottom half of the image (bottom view)
+%                   br_yt   = y of top half of the image (lateral view)
+%                   width   = width
+%                   height_b= height in bottom half of the image
+%                   height_t= height in top half of the image
+%                   Cordinates refer to the image halves *after cutting*. 
+%                   In whole image br_yt needs to be added to the split line.
 %
 % - cc:     2x2 matrix where the i-th column is the 2x1 image coordinates 
 %           of the centroid of the bounding in view i (i == 1 is bottom). 
@@ -59,48 +59,62 @@ elseif length(threshold) == 1 % if only one threshold is set,
     threshold = [threshold threshold]; % use same threshold for bottom and side view
 end
 
+% Fixed parameters:
+BB_WIDTH = 400;
+WIDTH_MARGIN = 0.10;
+CC = [];
+MIN_VIS_PIXEL = 10;
+
+% Setup dependent parameters: These are hardcoded by setup creators:
+BB_LEFT_MARGIN = 100;
+BB_RIGHT_MARGIN = 150;
+BB_TOP_MARGIN = 46;
+BB_BOTTOM_MARGIN = 761;
+
 [I_crop{[1 2]}] = splitImage(I,split_line);
     ti = 1;
 % [1] for ti = [1 2] this script only uses the side view to determine the box
     I_crop_bw{ti}=imadjust(I_crop{ti});  % brightness and contrast optimization
 % [2] [Start] Dana special: padding with a black frame
-	if ti==1
-        I_crop_bw{ti}(:,[1:46 761:size(I_crop_bw{ti},2)])=0; % remove edges x
-        I_crop_bw{ti}([1:100 150:size(I_crop_bw{ti},1)],:)=0; % remove edges y
-	end
-	% [End] ------------------------------------------------------------
     
-    % Image filtering and turning image into a true/false matrix
-    H = fspecial('disk',6);
-    I_crop_bw{ti}=imfilter(bwareaopen((im2bw(I_crop_bw{ti},threshold(ti))),500),H,'replicate');
-    % filling holes
-	I_crop_bw{ti} = imfill(I_crop_bw{ti},'holes');
-    % get largest object
-    CC = bwconncomp(I_crop_bw{ti}); % finds connected objects
-    % largest_object: idx of the object with most pixels
-    [~,largest_object] = max(cellfun(@(x)(length(x)),CC.PixelIdxList)); 
-    % remakeing the bw image to only show the largest_object:
-    I_crop_bw{ti} = false(size(I_crop_bw{ti})); 
-    I_crop_bw{ti}(CC.PixelIdxList{largest_object}) = true;
-    % Get bounding box for the largest object:
-    bbox{ti}=regionprops( I_crop_bw{ti},'BoundingBox');
-    objs{ti}=vertcat(bbox{ti}.BoundingBox); % [upper_left_X, upper_left_Y width height]
-% end
+    Ibw = im2bw(I_crop_bw{ti},threshold(ti));
+    Ibw = medfilt2(Ibw,[11 11]);
+    Ibw(1:BB_LEFT_MARGIN,:) = 0;
+    Ibw(BB_RIGHT_MARGIN:end,:) = 0;
+    Ibw(:,1:BB_TOP_MARGIN,:) = 0;
+    Ibw(:,BB_BOTTOM_MARGIN:end) = 0;
 
-if ~isempty(objs{1})
-%     box=[max(objs(:,1)+objs(:,3)),size(I_crop{2},1)-1,165;...
-%     400,size(I_crop{2},1),150];
+if ~isempty(any(Ibw(:)))
+    
+    % Sum white pixels along row and column to get a "projection" of the
+    % mouse
+    reduce_row = movsum(sum(Ibw,1),BB_WIDTH);
+    
+%     reduce_col = sum(Ibw,2);
+    
+    % Find rightmost column that sums to more than 10 pixels and add a 5%
+    % margin so long as we are within image bounds:
+    
+    
+    
+    [~,mid] = max(reduce_row);
+    tX = min(mid + (WIDTH_MARGIN+0.5)*BB_WIDTH,size(I,2));
+    
+    % Find the first and last rows to sum to more than 20 pixels and add a
+    % 10% margin 
+%     reduce_row_10 = reduce_col > 20;
+%     col_first = find(reduce_row_10, 1, 'first');
+%     col_last = find(reduce_row_10 ,1, 'last');
+%     
+%     height_side = min((col_last - col_first + 1) * 1.1, size(I_crop{ti},1));
 
-% [3] bounding box width is hardcoded
-    tX = (objs{1}(:,1)+objs{1}(:,3));
-    width = 400;
-    if width >= tX
-        width=tX-1;
+    height_side = size(I_crop{2},1);
+    
+    if BB_WIDTH >= tX
+        BB_WIDTH=tX-1;
     end
-% [4] The final box only uses the bottom right corner of the detected
-%	  object.
     box=[   tX,     size(I_crop{2},1)-1,    size(I_crop{1},1)-1;...
-            width,	size(I_crop{2},1),      size(I_crop{1},1)-objs{1}(:,4)];
+            BB_WIDTH,	size(I_crop{2},1)-1,      height_side];
 else
     box=   NaN(2,3);
 end
