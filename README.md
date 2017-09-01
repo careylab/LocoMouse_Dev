@@ -106,11 +106,9 @@ use the provided SVM models, please make sure the following conditions apply:
 
 * Images must be grayscale.
 
-* Images must be resized such that features have the expected size in pixels. No multiresolution analysis is performed (for reference, the size of the bottom
-view detector for the paw is 30x30 pixels). The system is cabable of rescaling,
-but needs user input on the scaling factor.
+* Images must be resized such that features have the expected size in pixels. No multiresolution analysis is performed (for reference, the size of the bottom view detector for the paw is 30x30 pixels). The system is cabable of rescaling, but needs user input on the scaling factor.
 
-* Background must be subtracted.bad
+* Background must be subtracted.
 
 * Mice must be black. For other colours, consider training a new SVM model.
 However, for mice that look white on the image it might not be possible to
