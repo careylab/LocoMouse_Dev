@@ -132,7 +132,7 @@ It's most likely to be one of these problems:
 
 * your image just isn't clean enough. *You want the still image of setup to be as dark as possible* You need to spend some time on optimizing the lighting, to minimize reflections (especially from the glass floor), while making the paws as bright as possible (without going into saturation). You also don't want to have non-black objects in the image. Finally, you don't want to see a moving shadow of the mouse anywhere. Yes, this is tricky, but worth it. *I find the best lighting is when the light comes from the front, below, and at an angle.*
 The camera should be ever so slightly above the center, so you can see the paws in the side view when they are in stance. I also have good experience with putting the back wall and ceiling, that create the background for the side and bottom view, respectively, at an angle to further reduce reflections.
-
+![alt text](SetupLightingExample.png)
 * your framerate is too low (see above)
 
 * You are using the wrong model
