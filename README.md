@@ -117,19 +117,19 @@ However, for mice that look white on the image it might not be possible to
 distinguish paws from body on the bottom view, which would break the system.
 
 ## Questions we were asked
-# What objective did you use and how far from the corridor is it?
+### What objective did you use and how far from the corridor is it?
 In the first publication using LocoMouse:
 objective: format is 4/3 inch, focal length 12 mm, iris range F2.0-22
 distance to mirror ca 60 cm
 corridor in view: ca 55 cm
 
-# Have you tried locoMouse also on data with lower sampling rates than 400Hz (e.g. 200Hz frame rate) and does it function comparably?
+### Have you tried locoMouse also on data with lower sampling rates than 400Hz (e.g. 200Hz frame rate) and does it function comparably?
 We have, and it also works. However, errors occur when the algorithm tries to 
 assign identity to the potential paws when the paws move too far between 
 frames. One can change the algorithm to allow larger distances, but then you
 run into the problem that more than one paw is located within the search region. In any case, if you reduce the frame rate, you need to make sure the exposure time does not increase. Longer exposure times lead to motion blurr.
 
-# My tracking looks bad, why?
+### My tracking looks bad, why?
 It's most likely to be one of these problems:
 
 * your image just isn't clean enough. *You want the still image of setup to be as dark as possible* You need to spend some time on optimizing the lighting, to minimize reflections (especially from the glass floor), while making the paws as bright as possible (without going into saturation). You also don't want to have non-black objects in the image. Finally, you don't want to see a moving shadow of the mouse anywhere. Yes, this is tricky, but worth it. *I find the best lighting is when the light comes from the front, below, and at an angle.*
@@ -146,11 +146,11 @@ There are several settings:
 - add an L or R at the end of your filename and use the L/R convention setting
 - if all movies in the list have the mouse face in the same direction, you can choose a fixed setting
 
-# Which data do I use for further analysis?
+### Which data do I use for further analysis?
 *tracks_final_c* and *tails_track_c* include pixel data after correction for distortions from optical perspective (this is why you need to run a calibration with LocoMouse_Calibration). You also need to find out the pixel to mm transformation in your setup. Multiply it with your pixel data to get real spatial measures.
 *tracks_final* and *tails_track* give you the pixel data *before the image is corrected for distortions*. They should *NOT* be used for stride parameter analysis, they are merely for visualization purposes (e.g. plotting the labels on images from the original video).
 
-# Do your stride analysis scripts give me publishable data?
+### Do your stride analysis scripts give me publishable data?
 I don't know, it depends on what you feed it, so you will have to check it. But my safe bet would be no.
 
 ## Acknowledgements
