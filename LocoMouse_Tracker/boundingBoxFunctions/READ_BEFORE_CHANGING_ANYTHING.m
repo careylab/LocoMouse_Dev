@@ -97,7 +97,7 @@
 
     %% [] MATLAB Alternative TM BB V2[JF]
     tON = tON+1; % don't edit
-    ComputeMouseBox_option(tON) = {'Treadmill Alternative BB V2[JF]'};
+    ComputeMouseBox_option(tON) = {'Treadmill Alternative BB V2 [JF]'};
     ComputeMouseBox_cmd_string(tON) = {'[bounding_box(:,:,1), cc, I_crop] =  computeMouseBox_TM_JF_V2(Iaux,split_line);'};    
     WeightSettings{tON} = weight_defaults;
     
@@ -146,6 +146,10 @@ tON = tON+1; % don't edit
 ComputeMouseBox_option(tON) = {'C++ TM Alternative BB V1 [JF]'}; 
 ComputeMouseBox_cmd_string(tON) = {{'c++','2','config_tm.yml'}};
 
+%% Treadmill Alternative BB V2
+tON = tON+1; % don't edit
+ComputeMouseBox_option(tON) = {'C++ TM Alternative BB V2 [JF]'}; 
+ComputeMouseBox_cmd_string(tON) = {{'c++','3','config_tm.yml'}};
 
 %%
 save([p_boundingBoxFunctions,filesep,'BoundingBoxOptions.mat'],'ComputeMouseBox_option','ComputeMouseBox_cmd_string','WeightSettings')

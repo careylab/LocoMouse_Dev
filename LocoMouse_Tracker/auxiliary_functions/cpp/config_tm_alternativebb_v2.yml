@@ -1,0 +1,97 @@
+%YAML:1.0
+# ===========================================================================#
+# LocoMouse Configuration File                                               #
+# - Configures tracker parameters. Use carefully as it can break the code.   #
+# ========================================================================== #
+#
+# Debug flags:
+#
+parameters_for_visual_debug: 0 # 1/0 -> Output parameters for debugTracker (in MATLAB)
+verbose_debug: 0 # 1/0 -> Use to debug code errors. Exports verbose txt file and yml data.
+N_debug_frames: 0 # N_debug_frames > 0 limits the frames to process. 0 processes all frames.
+#
+# User defined bounding box:
+# - These bounding boxes should be defined on calibrated (and flipped) images.
+# - Parameters on "data" are [x_tl y_tl width height]
+# - Do not edit other parameters
+#
+use_provided_bounding_box: 0 # 1/0 -> Use these bounding boxes instead of computing. 
+bounding_box_side: !!opencv-matrix
+   rows: 1
+   cols: 4
+   data: [0, 0, 100, 100]
+bounding_box_bottom: !!opencv-matrix
+   rows: 1
+   cols: 4
+   data: [0, 0, 100, 100]
+#
+# Spatial prior:
+# - Rows: FR Paw, HR Paw, FL Paw, HL Paw, Snout
+# - Columns: x_prior, y_prior, max_distance, x_feature_min, x_feature_max, y_feature_min, y_feature_max
+# - All entries are in normalized coordinates inside the bounding box.
+# - {x,y}_prior define an anchor point. max_distance is the maximum allowed distance to such point (for the corresponding feature).
+# - {x,y}_feature_{min,max} defines a rectangle where the feature can be located. Candidates outside these region are discarded.
+# - Each candidate is weighted inversely proportinal to their distance to the anchor point.
+location_prior: !!opencv-matrix
+   rows: 5
+   cols: 7
+   dt: d
+   data: [1, 1, 0.6, 0, 1, 0, 1,
+      0, 1, 0.6, 0, 1, 0, 1,
+      1, 0, 0.6, 0, 1, 0, 1,
+      0, 0, 0.6, 0, 1, 0, 1,
+      1, 0.5, 0.2, 0, 1, 0, 1]
+#
+# Image pre-processing:
+# - Apply transformations on the image. Only one transformation is allowed
+# 
+# * Histogram mapping to reference image:
+use_reference_image: 1 # 1/0 -> Apply histrogram mapping.
+reference_image_path: 'I_TEMPLATE_BOTTOM.png' # Failure to read halts the program.
+#
+# * Grayscale mapping: Lookup table to directly map pixel values
+transform_gray_values: 0 # 1/0 -> Apply mapping:
+gray_value_transformation: !!opencv-matrix
+   rows: 1
+   cols: 256
+   dt: u
+   data: [3, 3, 7, 10, 12, 15, 18, 20, 21, 23, 25, 28, 30, 31, 33, 35, 38, 40, 42, 44, 46, 49, 52, 54, 57, 60, 62, 64, 67, 71, 73, 75, 77, 81, 83, 86, 88, 91, 93, 96, 98, 100, 102, 103, 106, 108, 109, 111, 114, 115, 116, 117, 119, 120, 123, 124, 125, 125, 127, 128, 129, 131, 132, 134, 135, 137, 138, 139, 140, 141, 142, 144, 145, 146, 147, 148, 149, 150, 150, 151, 152, 155, 155, 156, 156, 157, 158, 159, 160, 161, 162, 163, 164, 164, 166, 167, 167, 168, 169, 170, 171, 172, 173, 174, 176, 176, 177, 178, 179, 180, 180, 181, 181, 182, 183, 184, 185, 187, 188, 190, 190, 192, 193, 194, 195, 196, 198, 200, 200, 201, 202, 203, 204, 204, 205, 206, 208, 209, 210, 211, 213, 214, 216, 217, 219, 220, 221, 222, 223, 224, 225, 226, 229, 231, 233, 235, 238, 241, 241, 241, 242, 244, 244, 247, 249, 251, 251, 251, 252, 252, 252, 252, 252, 252, 252, 252, 252, 252, 253, 253, 253, 253, 253, 253, 253, 253, 253, 253, 253, 254, 254, 254, 254, 254, 254, 254, 254, 254, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255]
+#
+# Key algorithm parameters: *ONLY EDIT IF CERTAIN OF WHAT ONE IS DOING*
+#
+# * Bounding box estimation:
+conn_comp_connectivity: 8 # 4/8 -> Connectivity of morphological algorithsm for region detection.
+median_filter_size: 11 # Odd integer -> Side of median filter for BB estimation.
+min_pixel_visible: 0 # >= 0 -> Minimum pixels per column to consider it valid for BB estimation.
+moving_average_window: 5 # Odd integer -> Windo for moving average smoothing of pixel locations.
+#
+# * Tracking and View matching:
+top_bottom_min_overlap: 0.7 # [0, 1] -> Width overlap between side and bottom views for candidates to match.
+max_displacement_bottom: 15 # >= 0 -> Maximum displacement of a feature between two frames along the X,Y plane. 
+max_displacement_side: 15 # >-0 -> Maximum displacement of a features between two frames along Z axis.
+alpha_vel_bottom: 0.1 # Relative weight for the velocity costs on the match2nd tracking algorithm for the X,Y plane.
+alpha_vel_side: 100 # Relative weight for the velocity costs on the match2nd tracking algorithm for the Z axis.
+pairwise_occluded_cost: 0.01 #Cost for moving to and between occluded points on the match2nd algorithm.
+#
+# * Occlusion handling:
+occlusion_grid_spacing_pixels_bottom: 20 # >=0 -> Spacing of the virtual point grid for occlusion on the X,Y plane.
+occlusion_grid_spacing_pixels_side: 20 # >= 0 -> Spacing of the virtual point grid for occlusion on the Z axis.
+occlusion_grid_max_width: 0.75 # [0,1] -> Maximum width to expand the grid (from snout to tail).
+#
+# * Tail tracking:
+tail_sub_bounding_box: 0.6 # [0,1] -> Area of BB used to search the tail (from tail to snout).
+#
+# Algorithm Specific Parameters: LocoMouse_TM (Alternative BB V2)
+# 
+# * Bounding box estimation: User defined BB overides these:
+bw_threshold_bottom: 12 # [0, 255] -> Threshold for binary image.
+bw_threshold_side: 12 # [0, 255] -> Threshold for binary image.
+min_pixel_count: 500 # >= 0 -> Regions with < number of pixels are discarded during BB computation.
+bb_width: 400 # >= 0 -> User defined BB width.
+bb_height_side: 150 # >= 0 -> User defined BB height on the side view.
+# zero_{col,row}_pre: set columns/rowss from [0, index[ to zero during BB estimation.
+zero_col_pre: 46 
+zero_row_pre: 100
+# zero_{col,row}_post: set columns/rows from [index, image_dim[ to zero during BB estimation. 
+zero_col_post: 760
+zero_row_post: 149
