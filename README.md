@@ -142,13 +142,13 @@ Make sure to use the model called 'paper'. The other models are just there for h
 
 * LocoMouse doesn't know where the mouse is facing.
 There are several settings:
-- automatic detection of the direction of the mouse (make sure Locomouse gets it right!)
-- add an L or R at the end of your filename and use the L/R convention setting
-- if all movies in the list have the mouse face in the same direction, you can choose a fixed setting
+  -- automatic detection of the direction of the mouse (make sure Locomouse gets it right!)
+  -- add an L or R at the end of your filename and use the L/R convention setting
+  -- if all movies in the list have the mouse face in the same direction, you can choose a fixed setting
 
 ### Which data do I use for further analysis?
-*tracks_final_c* and *tails_track_c* include pixel data after correction for distortions from optical perspective (this is why you need to run a calibration with LocoMouse_Calibration). You also need to find out the pixel to mm transformation in your setup. Multiply it with your pixel data to get real spatial measures.
-*tracks_final* and *tails_track* give you the pixel data *before the image is corrected for distortions*. They should *NOT* be used for stride parameter analysis, they are merely for visualization purposes (e.g. plotting the labels on images from the original video).
+*final_tracks_c* and *tracks_tail_c* include pixel data after correction for distortions from optical perspective (this is why you need to run a calibration with LocoMouse_Calibration). You also need to find out the pixel to mm transformation in your setup. Multiply it with your pixel data to get real spatial measures.
+*final_tracks* and *tracks_tail* give you the pixel data *before the image is corrected for distortions*. They should *NOT* be used for stride parameter analysis, they are merely for visualization purposes (e.g. plotting the labels on images from the original video).
 
 ### Do your stride analysis scripts give me publishable data?
 I don't know, it depends on what you feed it, so you will have to check it. But my safe bet would be no.
