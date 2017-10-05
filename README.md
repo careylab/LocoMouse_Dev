@@ -118,6 +118,13 @@ distinguish paws from body on the bottom view, which would break the system.
 To run the example you will need a video example. Please go to
 https://www.dropbox.com/sh/hfu0sayfzwoqwp1/AADcMwYPl0UHw8jTDIRIHBtoa?dl=0
  and download 'G6AE1_98_28_1_control_S1T1.avi' and 'G6AE1_98_28_1_control_S1T.png' into the LocoMouse/movies/3_11_2013_S1/G6AE1 folder.
+Settings:
+Output Mode: sameOutputFolder
+Background Mode: perSession
+Calibration File: IDX_pen_correct_fields2
+Model: model_LocoMouse_paper
+Mouse orientation: auto detect orientation
+Bounding Box and Weighting Set: Over Ground [Ana]
 
 ## Questions we were asked
 ### What objective did you use and how far from the corridor is it?
