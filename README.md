@@ -114,6 +114,11 @@ use the provided SVM models, please make sure the following conditions apply:
 However, for mice that look white on the image it might not be possible to
 distinguish paws from body on the bottom view, which would break the system.
 
+## Example data for testing
+To run the example you will need a video example. Please go to
+https://www.dropbox.com/sh/hfu0sayfzwoqwp1/AADcMwYPl0UHw8jTDIRIHBtoa?dl=0
+ and download 'G6AE1_98_28_1_control_S1T1.avi' and 'G6AE1_98_28_1_control_S1T.png' into the LocoMouse/movies/3_11_2013_S1/G6AE1 folder.
+
 ## Questions we were asked
 ### What objective did you use and how far from the corridor is it?
 In the first publication using LocoMouse:
