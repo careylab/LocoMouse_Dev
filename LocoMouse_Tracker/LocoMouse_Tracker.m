@@ -760,6 +760,7 @@ try
         % --- ending it:
         clear data;
         disp('----------------------');
+        disp(datestr(now))
         disp('Done. Elapsed time: ')
         disp(datestr(datenum(0,0,0,0,0,toc(current_file_time)),'HH:MM:SS'));
         disp('----------------------');
