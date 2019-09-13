@@ -7,7 +7,7 @@ function varargout = LocoMouse_Tracker(varargin)
 % Author: Joao Fayad (joao.fayad@neuro.fchampalimaud.org)
 % Last Modified: 17/11/2014
 
-% Last Modified by GUIDE v2.5 28-Jun-2017 19:34:27
+% Last Modified by GUIDE v2.5 22-Mar-2019 15:47:09
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -100,7 +100,7 @@ handles.disable_with_start = [  handles.pushbutton_start ...
     handles.MouseOrientation ...
     handles.LoadSettings ...
     handles.SaveSettings ...
-    ];
+    handles.checkbox_tailtracker];
 
 handles.enable_with_start = handles.pushbutton_stop;
 
@@ -522,6 +522,36 @@ else
             matlab_params); % No need for cpp_params
     end
 end
+
+if gui_status.run_tailtracker_v2
+    % get the filename
+    [~,outfile,~] = fileparts(file_name);
+    % get output path for data saving (for future overwrite)
+    [out_path_data,~] = feval(  gui_status.output_fun,...
+                                        gui_status.output_path,file_name);
+    calibration_file_mat = fullfile(handles.calibration_path,...
+                                [gui_status.calibration_file '.mat']);
+    try
+        fprintf('started tail tracking on %s.\n', outfile);
+        
+        
+        % track the tail, output to unconstrained format
+        [tailtracks, ~] = tt_master(file_name, bkg_file,...
+            calibration_file_mat);
+        fprintf('tail tracked %s.\n', outfile);
+        % convert to locomouse format
+        [tracks_tail_c, tracks_tail] = tt_convert_to_locomouse(...
+                            tailtracks, file_name, calibration_file_mat);
+        
+        datafile = fullfile(out_path_data, [outfile '.mat']);
+        tt_overwrite_tail_tracks(tracks_tail, tracks_tail_c, datafile);
+        fprintf('overwritting...\n');
+        fprintf('tail successfully tracked and saved for %s.\n', outfile);
+    catch
+        fprintf('tailtracker FAILED on %s.\n', outfile);
+    end
+end
+
 
 fprintf('%d out of %d files correctly processed.\n',sum(successful_tracking),N_files);
 fprintf('Total run time: ');
@@ -1370,7 +1400,8 @@ gui_status = struct('bb_cmd_string','',...
     'CreateBackgroundImage',0,...
     'file_list','',...
     'export_figures',false,...
-    'overwrite_results',false);
+    'overwrite_results',false,...
+    'run_tailtracker_v2', false);
 
 % File list:
 tfile_list = get(handles.listbox_files,'String');
@@ -1442,6 +1473,8 @@ gui_status.overwrite_results = handles.checkbox_overwrite_results.Value;
 
 % Configure export figures:
 gui_status.export_figures = handles.checkbox_ExpFigures.Value;
+
+gui_status.run_tailtracker_v2 = handles.checkbox_tailtracker.Value;
 
 
 % %%% OLD CODE THAT MUST BE REUSED SOMEWHERE
@@ -1710,3 +1743,13 @@ function CreateBackgroundImage_Callback(hObject, eventdata, handles)
 
 % Hint: get(hObject,'Value') returns toggle state of CreateBackgroundImage
  
+
+
+% --- Executes on button press in checkbox_tailtracker.
+function checkbox_tailtracker_Callback(hObject, eventdata, handles)
+% hObject    handle to checkbox_tailtracker (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hint: get(hObject,'Value') returns toggle state of checkbox_tailtracker
+% gui_status.run_tailtracker_v2 = get(hObject,'Value');
